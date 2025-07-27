@@ -16,13 +16,69 @@ interface ParameterCardProps {
   step?: number;
 }
 
-const parameterDescriptions: Record<string, string> = {
-  Mata: "Nilai 9: Bola mata cembung, kornea jernih, pupil hitam mengkilap. Nilai 7-8: Bola mata rata, kornea agak keruh. Nilai 5-6: Bola mata cekung, kornea keruh. Nilai 1-3: Bola mata sangat cekung, kornea sangat keruh",
-  Insang: "Nilai 9: Warna merah tua/coklat cemerlang, tanpa lendir. Nilai 7-8: Warna merah muda, sedikit lendir jernih. Nilai 5-6: Warna merah muda kelabu, lendir agak keruh. Nilai 1-3: Warna coklat kelabu, lendir tebal dan keruh",
-  Lendir: "Nilai 9: Lapisan tipis, transparan, jernih mengkilap. Nilai 7-8: Lapisan tipis, jernih sedikit keruh. Nilai 5-6: Lapisan agak tebal, keruh. Nilai 1-3: Lapisan tebal, keruh, lengket",
-  Daging: "Nilai 9: Sayatan cemerlang, jaringan kuat, elastis. Nilai 7-8: Sayatan kurang cemerlang, jaringan kuat. Nilai 5-6: Sayatan agak suram, jaringan agak lunak. Nilai 1-3: Sayatan suram, jaringan sangat lunak",
-  Bau: "Nilai 9: Segar, spesifik jenis. Nilai 7-8: Kurang segar, spesifik jenis. Nilai 5-6: Netral, tidak spesifik. Nilai 1-3: Busuk, tidak spesifik jenis",
-  Tekstur: "Nilai 9: Padat, kompak, elastis. Nilai 7-8: Padat, kurang elastis. Nilai 5-6: Agak lunak, kurang elastis. Nilai 1-3: Lunak, bekas jari tertinggal",
+// Valid scores for each parameter according to SNI standards
+const validScores: Record<string, number[]> = {
+  Mata: [1, 3, 5, 6, 7, 8, 9],
+  Insang: [1, 3, 6, 7, 8, 9],
+  Lendir: [1, 3, 5, 6, 7, 8, 9],
+  Daging: [1, 5, 6, 7, 8, 9],
+  Bau: [1, 3, 5, 6, 7, 8, 9],
+  Tekstur: [1, 3, 6, 7, 8, 9],
+};
+
+// Specific descriptions for each parameter score
+const scoreDescriptions: Record<string, Record<number, string>> = {
+  Mata: {
+    9: "Bola mata cembung, pupil dan kornea jernih",
+    8: "Bola mata rata, pupil dan kornea jernih",
+    7: "Bola mata rata, pupil berwarna abu-abu, kornea agak keruh",
+    6: "Bola mata agak cekung, pupil berwarna abu-abu, kornea agak keruh",
+    5: "Bola mata agak cekung, pupil berwarna abu-abu, kornea keruh, tidak mengkilap",
+    3: "Bola mata agak cekung, pupil abu-abu, kornea sangat keruh, tidak mengkilap",
+    1: "Bola mata sangat cekung, pupil abu-abu, kornea sangat keruh, tidak mengkilap"
+  },
+  Insang: {
+    9: "Warna insang merah tua, cemerlang dengan sedikit sekali lendir transparan",
+    8: "Warna insang merah tua, kurang cemerlang dengan sedikit lendir transparan",
+    7: "Warna insang merah muda dengan sedikit lendir agak keruh",
+    6: "Warna insang merah muda dengan lendir keruh",
+    3: "Warna insang abu-abu dengan lendir putih susu bergumpal",
+    1: "Warna insang abu-abu dengan lendir coklat bergumpal"
+  },
+  Lendir: {
+    9: "Lapisan lendir permukaan badan jernih, transparan, mengkilap cerah",
+    8: "Lapisan lendir permukaan badan jernih, transparan, cukup cerah",
+    7: "Lapisan lendir permukaan badan mulai agak keruh",
+    6: "Lapisan lendir permukaan badan mulai keruh",
+    5: "Lendir permukaan badan agak tebal dan mulai berubah warna",
+    3: "Lendir permukaan badan tebal, sedikit menggumpal, berubah warna",
+    1: "Lendir permukaan badan tebal menggumpal, berubah warna"
+  },
+  Daging: {
+    9: "Jaringan daging sangat kuat",
+    8: "Jaringan daging kuat",
+    7: "Jaringan daging kurang kuat, sayatan daging kurang cemerlang",
+    6: "Jaringan daging kurang kuat, sayatan daging mulai pudar",
+    5: "Jaringan daging kurang kuat, sayatan daging kusam",
+    1: "Jaringan daging kurang kuat, sayatan daging sangat kusam"
+  },
+  Bau: {
+    9: "Sangat segar, bau khas ikan",
+    8: "Segar",
+    7: "Segar, bau khas ikan berkurang",
+    6: "Netral",
+    5: "Sedikit bau asam",
+    3: "Bau asam kuat",
+    1: "Bau busuk kuat"
+  },
+  Tekstur: {
+    9: "Padat, kompak, sangat elastis",
+    8: "Padat, kompak, elastis",
+    7: "Agak lunak, agak elastis",
+    6: "Agak lunak, sedikit kurang elastis",
+    3: "Lunak, ditekan bekas jari akan hilang kembali lambat",
+    1: "Lunak, ditekan bekas jari tidak kembali"
+  }
 };
 
 const getValueDescription = (param: string, value: number | null): string => {
@@ -47,7 +103,13 @@ export const ParameterCard = React.memo(function ParameterCard({
 }: ParameterCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  const desc = description || parameterDescriptions[name] || "";
+  // Get specific description for current score
+  const getScoreDesc = (param: string, score: number | null): string => {
+    if (score === null) return "";
+    return scoreDescriptions[param]?.[score] || "";
+  };
+  
+  const desc = description || getScoreDesc(name, value) || "";
   
   // Memoized calculations to prevent unnecessary recalculations
   const { valueDescription, styling } = useMemo(() => {
