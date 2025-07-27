@@ -155,16 +155,32 @@ export const ParameterCard = React.memo(function ParameterCard({
     };
   }, [name, value]);
   
-  // Optimized slider change handler with debouncing effect
+  // Get valid scores for current parameter
+  const currentValidScores = validScores[name] || [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  
+  // Find closest valid score
+  const getClosestValidScore = (targetValue: number): number => {
+    return currentValidScores.reduce((closest, current) => 
+      Math.abs(current - targetValue) < Math.abs(closest - targetValue) ? current : closest
+    );
+  };
+  
+  // Optimized slider change handler with validation
   const handleSliderChange = useCallback((newValue: number[]) => {
     // Use requestAnimationFrame to ensure smooth UI updates
     requestAnimationFrame(() => {
-      // Skip value 4 as it's not valid in SNI
-      if (newValue[0] !== 4) {
+      const targetValue = newValue[0];
+      
+      // Check if the value is valid for this parameter
+      if (currentValidScores.includes(targetValue)) {
         onChange(name, newValue);
+      } else {
+        // Find closest valid score and use that instead
+        const closestValidScore = getClosestValidScore(targetValue);
+        onChange(name, [closestValidScore]);
       }
     });
-  }, [name, onChange]);
+  }, [name, onChange, currentValidScores]);
   
   return (
     <motion.div
@@ -190,13 +206,14 @@ export const ParameterCard = React.memo(function ParameterCard({
           
           <div className={`${styling.trackColor}`}>
             <Slider
-              value={value === null ? [1] : [value]}
+              value={value === null ? [currentValidScores[0]] : [value]}
               min={min}
               max={max}
               step={step}
               onValueChange={handleSliderChange}
               className="my-2"
               disabled={false}
+              validValues={currentValidScores}
             />
           </div>
           
@@ -214,11 +231,15 @@ export const ParameterCard = React.memo(function ParameterCard({
               className="mt-3 text-sm text-muted-foreground dark:text-gray-400 border-t pt-2 border-visionfish-neon-blue/10 dark:border-visionfish-neon-blue/20"
             >
               {desc}
-              {value === 4 && (
+              {value !== null && !currentValidScores.includes(value) && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">
-                  Nilai 4 tidak valid dalam standar SNI. Gunakan nilai 1-3 atau 5-9.
+                  Nilai {value} tidak valid untuk parameter {name} dalam standar SNI. 
+                  Nilai valid: {currentValidScores.join(', ')}.
                 </p>
               )}
+              <div className="mt-2 text-xs text-gray-600 dark:text-gray-500">
+                <strong>Nilai Valid:</strong> {currentValidScores.join(', ')}
+              </div>
             </motion.div>
           )}
         </CardContent>

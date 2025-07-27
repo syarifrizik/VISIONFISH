@@ -24,13 +24,25 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
     setInputValue(value.toString());
   }, [value]);
   
+  // Valid scores for each parameter according to SNI standards
+  const validScores: Record<string, number[]> = {
+    Mata: [1, 3, 5, 6, 7, 8, 9],
+    Insang: [1, 3, 6, 7, 8, 9],
+    Lendir: [1, 3, 5, 6, 7, 8, 9],
+    Daging: [1, 5, 6, 7, 8, 9],
+    Bau: [1, 3, 5, 6, 7, 8, 9],
+    Tekstur: [1, 3, 6, 7, 8, 9],
+  };
+  
+  const currentValidScores = validScores[name as string] || [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     
-    // Only update the actual value if it's a valid number (excluding 4)
+    // Only update the actual value if it's a valid number for this parameter
     const numValue = parseInt(newValue);
-    if (!isNaN(numValue) && numValue >= 1 && numValue <= 9 && numValue !== 4) {
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= 9 && currentValidScores.includes(numValue)) {
       onChange(name, [numValue]);
     }
   };
@@ -40,7 +52,7 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
     
     // If the input is empty or invalid, reset to the previous valid value
     const numValue = parseInt(inputValue);
-    if (isNaN(numValue) || numValue < 1 || numValue > 9 || numValue === 4) {
+    if (isNaN(numValue) || numValue < 1 || numValue > 9 || !currentValidScores.includes(numValue)) {
       setInputValue(value.toString());
     } else {
       onChange(name, [numValue]);
@@ -48,23 +60,23 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
   };
   
   const incrementValue = () => {
-    if (value < 9) {
-      const nextValue = value + 1;
-      // Skip value 4 as it's not valid in SNI
-      onChange(name, [nextValue === 4 ? 5 : nextValue]);
+    const currentIndex = currentValidScores.indexOf(value);
+    if (currentIndex < currentValidScores.length - 1) {
+      const nextValue = currentValidScores[currentIndex + 1];
+      onChange(name, [nextValue]);
     }
   };
   
   const decrementValue = () => {
-    if (value > 1) {
-      const nextValue = value - 1;
-      // Skip value 4 as it's not valid in SNI
-      onChange(name, [nextValue === 4 ? 3 : nextValue]);
+    const currentIndex = currentValidScores.indexOf(value);
+    if (currentIndex > 0) {
+      const nextValue = currentValidScores[currentIndex - 1];
+      onChange(name, [nextValue]);
     }
   };
   
   const renderInvalidScoreWarning = (value: number) => {
-    return value === 4 ? (
+    return !currentValidScores.includes(value) ? (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -73,7 +85,7 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Nilai 4 tidak valid dalam standar SNI. Gunakan nilai 1-3 atau 5-9</p>
+            <p>Nilai {value} tidak valid untuk parameter {name} dalam standar SNI. Nilai valid: {currentValidScores.join(', ')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -88,8 +100,8 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
           {renderInvalidScoreWarning(value)}
         </Label>
         <div className="flex items-center">
-          <span className={`mr-2 ${value === 4 ? 'text-amber-500' : 'text-visionfish-neon-blue'}`}>
-            {value} {value === 4 && '(tidak valid)'}
+          <span className={`mr-2 ${!currentValidScores.includes(value) ? 'text-amber-500' : 'text-visionfish-neon-blue'}`}>
+            {value} {!currentValidScores.includes(value) && '(tidak valid)'}
           </span>
           
           <div className="flex flex-col">
@@ -99,7 +111,7 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
               size="icon" 
               className="h-6 w-6" 
               onClick={incrementValue}
-              disabled={value >= 9}
+              disabled={currentValidScores.indexOf(value) >= currentValidScores.length - 1}
             >
               <ArrowUp className="h-3 w-3" />
             </Button>
@@ -109,7 +121,7 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
               size="icon" 
               className="h-6 w-6" 
               onClick={decrementValue}
-              disabled={value <= 1}
+              disabled={currentValidScores.indexOf(value) <= 0}
             >
               <ArrowDown className="h-3 w-3" />
             </Button>
@@ -125,7 +137,7 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
               onFocus={() => setIsFocused(true)}
               onBlur={handleInputBlur}
               className={`text-center h-8 ${
-                value === 4 ? 'text-amber-500 border-amber-500' : 'text-visionfish-neon-blue'
+                !currentValidScores.includes(value) ? 'text-amber-500 border-amber-500' : 'text-visionfish-neon-blue'
               } ${isFocused ? 'border-visionfish-neon-blue ring-1 ring-visionfish-neon-blue' : ''}`}
             />
           </div>
@@ -139,12 +151,18 @@ const ParameterInput = ({ name, value, onChange }: ParameterInputProps) => {
         step={1}
         value={[value]}
         onValueChange={(val) => {
-          // Skip value 4 as it's not valid in SNI
-          if (val[0] !== 4) {
+          // Only allow valid values for this parameter
+          if (currentValidScores.includes(val[0])) {
             onChange(name, val);
+          } else {
+            // Find closest valid score
+            const closestScore = currentValidScores.reduce((closest, current) => 
+              Math.abs(current - val[0]) < Math.abs(closest - val[0]) ? current : closest
+            );
+            onChange(name, [closestScore]);
           }
         }}
-        className={`cursor-pointer ${value === 4 ? 'slider-warning' : ''}`}
+        className={`cursor-pointer ${!currentValidScores.includes(value) ? 'slider-warning' : ''}`}
       />
     </div>
   );

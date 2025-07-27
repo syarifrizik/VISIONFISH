@@ -369,12 +369,26 @@ Analisis oleh VisionFish.io`;
     try {
       const hasResults = analysisResults.length > 0;
       
-      // Skip parameters with value 4 or null in calculations for accurate SNI standards
+      // Valid scores for each parameter according to SNI standards
+      const validScores: Record<string, number[]> = {
+        Mata: [1, 3, 5, 6, 7, 8, 9],
+        Insang: [1, 3, 6, 7, 8, 9],
+        Lendir: [1, 3, 5, 6, 7, 8, 9],
+        Daging: [1, 5, 6, 7, 8, 9],
+        Bau: [1, 3, 5, 6, 7, 8, 9],
+        Tekstur: [1, 3, 6, 7, 8, 9],
+      };
+      
+      const isValidParameter = (name: string, value: any): boolean => {
+        return typeof value === 'number' && validScores[name]?.includes(value) || false;
+      };
+
+      // Skip invalid parameters and null values in calculations for accurate SNI standards
       const filteredResults = analysisResults.map(sample => {
         const filtered = { ...sample };
         Object.entries(filtered).forEach(([key, value]) => {
-          if ((value === 4 || value === null) && key !== 'id' && key !== 'Kategori' && key !== 'Skor' && key !== 'timestamp' && key !== 'fishName') {
-            // Mark parameters with value 4 or null as null for calculation purposes
+          if ((!isValidParameter(key, value) || value === null) && key !== 'id' && key !== 'Kategori' && key !== 'Skor' && key !== 'timestamp' && key !== 'fishName') {
+            // Mark invalid parameters or null values as null for calculation purposes
             (filtered as any)[key] = null;
           }
         });
@@ -414,10 +428,10 @@ Analisis oleh VisionFish.io`;
       const radarChartData = validResults.length
         ? [Object.keys(parameters).reduce((acc, key) => {
             const paramKey = key as keyof FishParameter;
-            // Filter out any parameter with value 4 or null for accurate calculations
+            // Filter out invalid parameters and null values for accurate calculations
             const validValues = validResults
               .map(r => r[paramKey])
-              .filter(v => typeof v === 'number'&& v !== 4) as number[];
+              .filter(v => isValidParameter(paramKey, v)) as number[];
               
             acc[paramKey] = validValues.length 
               ? validValues.reduce((sum, val) => sum + val, 0) / validValues.length 

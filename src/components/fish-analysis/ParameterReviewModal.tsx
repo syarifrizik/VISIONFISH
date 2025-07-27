@@ -57,9 +57,23 @@ const ParameterReviewModal: React.FC<ParameterReviewModalProps> = ({
   fishName,
   onConfirm,
 }) => {
+  // Valid scores for each parameter according to SNI standards
+  const validScores: Record<string, number[]> = {
+    Mata: [1, 3, 5, 6, 7, 8, 9],
+    Insang: [1, 3, 6, 7, 8, 9],
+    Lendir: [1, 3, 5, 6, 7, 8, 9],
+    Daging: [1, 5, 6, 7, 8, 9],
+    Bau: [1, 3, 5, 6, 7, 8, 9],
+    Tekstur: [1, 3, 6, 7, 8, 9],
+  };
+  
+  const isValidParameter = (name: string, value: number): boolean => {
+    return validScores[name]?.includes(value) || false;
+  };
+  
   const avgScore = Object.values(parameters).reduce((sum, val) => sum + val, 0) / Object.values(parameters).length;
-  const validParams = Object.entries(parameters).filter(([_, value]) => value !== 4);
-  const invalidParams = Object.entries(parameters).filter(([_, value]) => value === 4);
+  const validParams = Object.entries(parameters).filter(([name, value]) => isValidParameter(name, value));
+  const invalidParams = Object.entries(parameters).filter(([name, value]) => !isValidParameter(name, value));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,12 +145,12 @@ const ParameterReviewModal: React.FC<ParameterReviewModalProps> = ({
                 <span className="font-medium text-amber-800">Parameter Diabaikan</span>
               </div>
               <div className="text-sm text-amber-700 mb-2">
-                Parameter berikut memiliki nilai 4 (tidak valid dalam standar SNI) dan akan diabaikan dalam perhitungan:
+                Parameter berikut memiliki nilai yang tidak valid dalam standar SNI dan akan diabaikan dalam perhitungan:
               </div>
               <div className="flex flex-wrap gap-2">
-                {invalidParams.map(([name]) => (
+                {invalidParams.map(([name, value]) => (
                   <Badge key={name} variant="outline" className="bg-gray-100 text-gray-600">
-                    {name}
+                    {name}: {value} (Valid: {validScores[name]?.join(', ')})
                   </Badge>
                 ))}
               </div>
