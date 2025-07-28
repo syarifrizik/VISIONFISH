@@ -54,6 +54,7 @@ import RoleBasedHero from "@/components/fish-analysis/RoleBasedHero";
 import EnhancedSNIInfo from "@/components/fish-analysis/EnhancedSNIInfo";
 import FishSpeciesInput from "@/components/fish-analysis/FishSpeciesInput";
 import WorkflowSection from "@/components/fish-analysis/WorkflowSection";
+import DualClassificationCard from "@/components/fish-analysis/DualClassificationCard";
 import { ParameterCard } from "@/components/ui/parameter-card";
 
 // Define type for radar chart data
@@ -768,6 +769,14 @@ Analisis oleh VisionFish.io`;
                 </Button>
               </CardFooter>
             </Card>
+          </motion.div>
+          
+          {/* Dual Classification Comparison */}
+          <motion.div variants={itemAnimation}>
+            <DualClassificationCard
+              score={avgScore}
+              fishName={fishName}
+            />
           </motion.div>
           
           <motion.div variants={itemAnimation}>

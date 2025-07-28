@@ -37,12 +37,12 @@ export const calculateFreshness = (parameters: FishParameter): FishSample => {
   const totalScore = validParams.reduce((sum, [_, value]) => sum + value, 0);
   const averageScore = totalScore / validParams.length;
   
-  // Updated categorization matching 4-category system
+  // Hadiwiyoto 1993 categorization (4-category system)
   let category: string;
   if (averageScore >= 8) {
-    category = 'Sangat Baik';
+    category = 'Prima';
   } else if (averageScore >= 6) {
-    category = 'Baik';
+    category = 'Advance';
   } else if (averageScore >= 4) {
     category = 'Sedang';
   } else {
@@ -59,6 +59,20 @@ export const calculateFreshness = (parameters: FishParameter): FishSample => {
 };
 
 export const findBestParameter = (samples: FishSample[]): { parameter: string; score: number } => {
+  // Valid scores for each parameter according to organoleptic table
+  const validScores: Record<string, number[]> = {
+    Mata: [1, 3, 5, 6, 7, 8, 9],
+    Insang: [1, 3, 6, 7, 8, 9],
+    Lendir: [1, 3, 5, 6, 7, 8, 9],
+    Daging: [1, 5, 6, 7, 8, 9],
+    Bau: [1, 3, 5, 6, 7, 8, 9],
+    Tekstur: [1, 3, 6, 7, 8, 9],
+  };
+
+  const isValidParameter = (name: string, value: any): boolean => {
+    return typeof value === 'number' && validScores[name]?.includes(value) || false;
+  };
+
   const parameterScores: { [key: string]: number[] } = {
     Mata: [],
     Insang: [],
@@ -68,11 +82,12 @@ export const findBestParameter = (samples: FishSample[]): { parameter: string; s
     Tekstur: [],
   };
 
+  // Collect only valid scores for each parameter (like Excel AVERAGE function)
   samples.forEach(sample => {
     for (const key in parameterScores) {
       const value = sample[key as keyof FishParameter];
-      if (typeof value === 'number') {
-        parameterScores[key].push(value);
+      if (isValidParameter(key, value)) {
+        parameterScores[key].push(value as number);
       }
     }
   });
@@ -80,6 +95,7 @@ export const findBestParameter = (samples: FishSample[]): { parameter: string; s
   let bestParameter = '';
   let bestAverageScore = 0;
 
+  // Calculate average for each parameter (AVERAGE function equivalent)
   for (const key in parameterScores) {
     const scores = parameterScores[key];
     if (scores.length > 0) {
@@ -166,10 +182,9 @@ export const sortSamples = (samples: FishSample[], field: keyof FishSample, asce
 
 export const getFreshnessBadgeColor = (category: string): string => {
   switch (category) {
-    case 'Sangat Baik':
     case 'Prima':
       return 'bg-blue-100 text-blue-800';
-    case 'Baik':
+    case 'Advance':
       return 'bg-green-100 text-green-800';
     case 'Sedang':
       return 'bg-yellow-100 text-yellow-800';
@@ -195,10 +210,9 @@ export const getFreshnessStatus = (score: number): string => {
 // Add missing functions that other components are trying to import
 export const getRecommendation = (category: string): string => {
   switch (category) {
-    case 'Sangat Baik':
     case 'Prima':
-      return 'Ikan dalam kondisi sangat baik, layak untuk dikonsumsi dan dijual.';
-    case 'Baik':
+      return 'Ikan dalam kondisi prima, sangat layak untuk dikonsumsi dan dijual.';
+    case 'Advance':
       return 'Ikan dalam kondisi baik, masih layak untuk dikonsumsi.';
     case 'Sedang':
       return 'Ikan dalam kondisi sedang, disarankan untuk segera diolah.';
@@ -211,10 +225,9 @@ export const getRecommendation = (category: string): string => {
 
 export const getDetailedExplanation = (category: string): string => {
   switch (category) {
-    case 'Sangat Baik':
     case 'Prima':
       return 'Berdasarkan analisis parameter visual, ikan ini menunjukkan ciri-ciri kesegaran optimal. Mata jernih dan menonjol, insang berwarna merah cerah, tekstur daging elastis dan padat, serta tidak ada tanda-tanda pembusukan. Ikan ini sangat aman untuk dikonsumsi dan memiliki nilai gizi yang tinggi.';
-    case 'Baik':
+    case 'Advance':
       return 'Ikan ini masih dalam kondisi segar dengan sebagian besar parameter menunjukkan kualitas yang baik. Meskipun ada beberapa parameter yang sedikit menurun, secara keseluruhan ikan masih layak konsumsi dan aman untuk diolah menjadi berbagai hidangan.';
     case 'Sedang':
       return 'Ikan menunjukkan tanda-tanda penurunan kesegaran dengan beberapa parameter berada di batas toleransi. Disarankan untuk segera mengolah atau mengonsumsi ikan ini. Pastikan memasak dengan suhu yang cukup tinggi untuk memastikan keamanan pangan.';

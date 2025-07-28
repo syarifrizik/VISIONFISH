@@ -49,8 +49,8 @@ interface SummarySectionProps {
 
 const COLORS = ['#4CAF50', '#FF9800', '#F44336', '#9E9E9E'];
 const CATEGORY_COLORS = {
-  'Prima': '#4CAF50', // Green
-  'Baik': '#8BC34A',  // Light green
+  'Prima': '#2196F3', // Blue
+  'Advance': '#4CAF50', // Green
   'Sedang': '#FF9800', // Orange
   'Busuk': '#F44336',  // Red
   'Invalid': '#9E9E9E' // Grey

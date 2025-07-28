@@ -67,7 +67,7 @@ const AnalysisCard = ({
     switch (category) {
       case 'Prima':
         return 'success';
-      case 'Baik':
+      case 'Advance':
         return 'success';
       case 'Sedang':
         return 'warning';
@@ -103,9 +103,9 @@ const AnalysisCard = ({
   const getCategoryColor = () => {
     switch (dominantCategory) {
       case "Prima": return "from-blue-500 to-cyan-400";
-      case "Baik": return "from-green-500 to-emerald-400";
+      case "Advance": return "from-green-500 to-emerald-400";
       case "Sedang": return "from-amber-500 to-yellow-400";
-      case "Buruk": return "from-red-500 to-rose-400";
+      case "Busuk": return "from-red-500 to-rose-400";
       default: return "from-visionfish-neon-blue to-visionfish-neon-pink";
     }
   };
@@ -184,13 +184,13 @@ const AnalysisCard = ({
               {dominantCategory === "Prima" && (
                 <span className="text-blue-500 text-xl">★★★★</span>
               )}
-              {dominantCategory === "Baik" && (
+              {dominantCategory === "Advance" && (
                 <span className="text-green-500 text-xl">★★★</span>
               )}
               {dominantCategory === "Sedang" && (
                 <span className="text-amber-500 text-xl">★★</span>
               )}
-              {dominantCategory === "Buruk" && (
+              {dominantCategory === "Busuk" && (
                 <span className="text-red-500 text-xl">★</span>
               )}
             </motion.div>
