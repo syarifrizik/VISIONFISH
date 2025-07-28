@@ -19,6 +19,16 @@ interface BatchInputModalProps {
   children: React.ReactNode;
 }
 
+// Valid scores for each parameter according to SNI standards
+const validScores: Record<string, number[]> = {
+  Mata: [1, 3, 5, 6, 7, 8, 9],
+  Insang: [1, 3, 6, 7, 8, 9],
+  Lendir: [1, 3, 5, 6, 7, 8, 9],
+  Daging: [1, 5, 6, 7, 8, 9],
+  Bau: [1, 3, 5, 6, 7, 8, 9],
+  Tekstur: [1, 3, 6, 7, 8, 9],
+};
+
 const parameterDescriptions: Record<string, string> = {
   Mata: "Mata ikan segar memiliki kornea jernih, pupil hitam, bola mata cembung",
   Insang: "Insang ikan segar berwarna merah cerah, tanpa lendir",
@@ -49,7 +59,7 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
     }
   }, [isOpen, parameters]);
 
-  // Enhanced input handler with validation and 4-value prevention
+  // Enhanced input handler with validation per parameter
   const handleInputChange = useCallback((param: keyof FishParameter, value: string) => {
     // Clear any existing invalid state for this parameter
     setInvalidInputs(prev => {
@@ -63,26 +73,24 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
       return;
     }
     
-    // Block value 4 specifically with user feedback
-    if (value === '4') {
-      setInvalidInputs(prev => new Set([...prev, param]));
-      setShowSNIWarning(true);
-      toast.error(`Nilai 4 tidak diperbolehkan untuk parameter ${param} (tidak sesuai SNI)`);
-      return;
-    }
-
     // Take only the last digit entered (replace behavior)
     const lastChar = value.slice(-1);
     const numValue = parseInt(lastChar);
     
-    if (!isNaN(numValue) && numValue >= 1 && numValue <= 9 && numValue !== 4) {
-      setTempParameters(prev => ({ ...prev, [param]: numValue }));
-      setShowSNIWarning(false);
-    } else if (numValue === 4) {
-      // Additional check in case 4 gets through
-      setInvalidInputs(prev => new Set([...prev, param]));
-      setShowSNIWarning(true);
-      toast.error(`Nilai 4 tidak diperbolehkan (tidak sesuai SNI)`);
+    // Get valid scores for this parameter
+    const currentValidScores = validScores[param] || [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= 9) {
+      if (currentValidScores.includes(numValue)) {
+        setTempParameters(prev => ({ ...prev, [param]: numValue }));
+        setShowSNIWarning(false);
+      } else {
+        // Block invalid value for this parameter
+        setInvalidInputs(prev => new Set([...prev, param]));
+        setShowSNIWarning(true);
+        toast.error(`Nilai ${numValue} tidak tersedia untuk parameter ${param}. Nilai valid: ${currentValidScores.join(', ')}`);
+        return;
+      }
     }
   }, []);
 
@@ -183,8 +191,8 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
             <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-900/20">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800 dark:text-amber-200">
-                <strong>Perhatian:</strong> Nilai 4 tidak diperbolehkan karena tidak sesuai dengan standar SNI 2729-2013 untuk ikan segar.
-                Gunakan nilai 1-3 (Busuk), 5-6 (Sedang), 7-8 (Baik), atau 9 (Prima).
+                <strong>Perhatian:</strong> Gunakan hanya nilai yang valid sesuai standar organoletik SNI 2729-2013.
+                Setiap parameter memiliki nilai valid yang berbeda.
               </AlertDescription>
             </Alert>
           )}
@@ -193,7 +201,7 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
           <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800 dark:text-blue-200">
-              <strong>Standar SNI 2729-2013:</strong> Skala penilaian 1-9 (nilai 4 tidak termasuk dalam standar)
+              <strong>Standar SNI 2729-2013:</strong> Penilaian organoletik dengan nilai valid berbeda untuk setiap parameter
             </AlertDescription>
           </Alert>
 
@@ -296,16 +304,19 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
                     maxLength={1}
                     value={value === null ? '' : value.toString()}
                     onChange={(e) => handleInputChange(paramKey, e.target.value)}
-                    onKeyDown={(e) => {
-                      // Prevent typing '4' directly
-                      if (e.key === '4') {
+                     onKeyDown={(e) => {
+                      // Get valid scores for this parameter
+                      const currentValidScores = validScores[paramKey] || [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                      
+                      // Prevent typing invalid values directly
+                      if (e.key >= '1' && e.key <= '9' && !currentValidScores.includes(parseInt(e.key))) {
                         e.preventDefault();
                         setInvalidInputs(prev => new Set([...prev, param]));
                         setShowSNIWarning(true);
-                        toast.error(`Nilai 4 tidak diperbolehkan untuk ${param}`);
+                        toast.error(`Nilai ${e.key} tidak tersedia untuk ${param}. Nilai valid: ${currentValidScores.join(', ')}`);
                       }
                     }}
-                    placeholder="1-3,5-9"
+                    placeholder={`Valid: ${validScores[paramKey]?.join(',') || '1-9'}`}
                     className={`text-center h-12 text-lg font-medium transition-all duration-200 ${
                       isInvalid 
                         ? 'border-red-500 bg-red-50 dark:bg-red-900/20 focus:ring-red-500' 
@@ -323,7 +334,7 @@ const BatchInputModal = React.memo<BatchInputModalProps>(function BatchInputModa
                       className="text-xs text-red-600 flex items-center gap-1"
                     >
                       <AlertTriangle className="w-3 h-3" />
-                      Nilai 4 tidak diperbolehkan
+                      Nilai tidak valid untuk parameter ini
                     </motion.p>
                   )}
                 </div>

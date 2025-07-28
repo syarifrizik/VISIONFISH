@@ -254,31 +254,31 @@ const ResultsTable = ({ results, onDelete, onSort, onUpdateResults }: ResultsTab
         <div className="flex items-center gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button 
+                <Button 
                 variant="outline" 
                 size="sm" 
                 className="flex items-center gap-2 border-amber-500/30 text-amber-500 hover:bg-amber-500/10"
               >
                 <Info className="w-4 h-4" />
-                <span className="hidden sm:inline">Nilai 4 & SNI</span>
+                <span className="hidden sm:inline">Standar SNI</span>
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Tentang Nilai 4 dan Standar SNI</AlertDialogTitle>
+              <AlertDialogTitle>Tentang Standar SNI Organoletik</AlertDialogTitle>
                 <AlertDialogDescription className="space-y-4">
                   <p>
-                    Berdasarkan SNI 2729-2013 tentang Ikan Segar, nilai 4 tidak termasuk dalam standar penilaian mutu ikan.
-                    Nilai ini diabaikan dalam perhitungan untuk memberikan hasil yang sesuai dengan standar nasional.
+                    Berdasarkan SNI 2729-2013 tentang Ikan Segar, setiap parameter organoletik memiliki nilai valid yang berbeda sesuai standar nasional.
+                    Nilai yang tidak valid akan diabaikan dalam perhitungan untuk memberikan hasil yang akurat.
                   </p>
                   <p>
-                    Standar penilaian SNI untuk ikan segar menggunakan skala 1-3 dan 5-9, di mana:
+                    Standar penilaian SNI untuk ikan segar menggunakan skala yang disesuaikan per parameter, dengan kategori:
                   </p>
                   <ul className="list-disc pl-6 space-y-1">
                     <li>Nilai 9: Prima</li>
                     <li>Nilai 7-8: Baik</li>
                     <li>Nilai 5-6: Sedang</li>
-                    <li>Nilai 1-3: Busuk</li>
+                    <li>Nilai 1-4: Busuk</li>
                   </ul>
                   <div className="mt-4">
                     <a 

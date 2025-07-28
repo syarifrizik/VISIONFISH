@@ -218,7 +218,7 @@ export const ParameterCard = React.memo(function ParameterCard({
           </div>
           
           <div className="flex justify-between text-xs text-muted-foreground dark:text-gray-400 mt-1">
-            <span>Busuk (1-3)</span>
+            <span>Busuk (1-4)</span>
             <span className={styling.valueColor}>{valueDescription}</span>
             <span>Sangat Baik (9)</span>
           </div>

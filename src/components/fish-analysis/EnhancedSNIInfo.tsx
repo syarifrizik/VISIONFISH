@@ -39,7 +39,7 @@ const qualityLevels: QualityLevel[] = [{
   characteristics: ['Mata keruh dan mulai cekung', 'Insang kemerahan dengan lendir', 'Daging mulai lembek', 'Bau mulai tidak segar'],
   actionAdvice: 'Sebaiknya segera diolah dengan panas tinggi atau diawetkan.'
 }, {
-  score: '1-3',
+  score: '1-4',
   label: 'Busuk',
   color: 'text-red-700 bg-red-100 border-red-200',
   icon: <XCircle className="w-4 h-4" />,
@@ -93,7 +93,7 @@ const EnhancedSNIInfo: React.FC = () => {
         <CardContent className="space-y-4">
           <p className="text-sm text-blue-700 dark:text-blue-300">
             Sistem penilaian menggunakan skala 1-9 berdasarkan Standar Nasional Indonesia untuk ikan segar.
-            <strong className="block mt-1">Nilai 4 tidak termasuk dalam standar SNI.</strong>
+            <strong className="block mt-1">Setiap parameter memiliki nilai valid yang berbeda sesuai standar organoletik.</strong>
           </p>
 
           {/* Quality Levels */}
@@ -189,7 +189,7 @@ const EnhancedSNIInfo: React.FC = () => {
                 <li>• Periksa mata dan insang terlebih dahulu</li>
                 <li>• Tekan daging untuk menguji elastisitas</li>
                 <li>• Bau adalah indikator penting kesegaran</li>
-                <li>• Hindari ikan dengan nilai 4 (tidak sesuai SNI)</li>
+                <li>• Gunakan hanya nilai yang valid sesuai standar organoletik</li>
               </ul>
             </div>
           </div>
